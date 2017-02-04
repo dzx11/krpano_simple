@@ -1,0 +1,17 @@
+<krpano>
+	
+	<!-- the skin -->
+	<include url="skin/defaultskin.xml" />
+	
+	<!-- view settings -->
+	<view hlookat="0" vlookat="0" maxpixelzoom="1.0" fovmax="150" limitview="auto" />
+	
+
+	<preview  id="preview" url="PANO.tiles/pano2.jpg" />
+
+	<image type="CYLINDER" hfov="1.00" vfov="0.160408" voffset="0.00" multires="true" tilesize="4000" progressive="true">
+		<level tiledimagewidth="8000" tiledimageheight="1283">
+		</level>
+	</image>
+
+</krpano>

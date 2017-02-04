@@ -1,0 +1,98 @@
+<script src="krpano.js"></script>
+<input type="file" id="fileinput" style="margin-left:50%; margin-top:12px; margin-bottom:12px" accept="image/*">Use your own image</input>
+
+<div id="pano" style="width:100%;height:100%;"></div>
+
+<script>
+    window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
+
+    var krpano = null;
+
+  embedpano({xml:"pano.xml", target:"pano", onready: krpanoReady});
+    
+    
+function krpanoReady(newKrpano) 
+{
+    krpano = newKrpano;
+}
+function renderImage(file) {
+
+  // generate a new FileReader object
+  var reader = new FileReader();
+
+  // inject an image with the src url
+  reader.onload = function(event) {
+    loadpano();
+    
+  }
+ 
+  // when the file is read it triggers the onload event above.
+  reader.readAsDataURL(file);
+    
+        
+	function loadpano()
+	{
+        
+        function errorHandler(error) {
+            console.log(error);
+        }
+        function saveFile(fs)
+        {
+            fs.root.getFile(file.name, {create: true, exclusive: false}, function(fileEntry) {
+              fileEntry.createWriter(function(fileWriter) {
+                fileWriter.write(file); // Note: write() can take a File or Blob object.
+                  fs.root.getFile(new Date()+'.xml', {create: true, exclusive: true}, function(fe) {
+
+                    // Create a FileWriter object for our FileEntry (log.txt).
+                    fe.createWriter(function(fileWriter) {
+
+                      fileWriter.onwriteend = function(e) {
+                        console.log('Write completed.');
+                      };
+
+                      fileWriter.onerror = function(e) {
+                        console.log('Write failed: ' + e.toString());
+                      };
+
+                      var blob = new Blob([xml], {type: 'text/xml'});
+
+                      fileWriter.write(blob);
+
+                        krpano.call("loadpano("+fe.toURL()+", null, MERGE, BLEND(0.5));");
+
+                    }, errorHandler);
+
+                  }, errorHandler);
+              });
+                var url = fileEntry.name;
+
+
+                var xml="";
+                xml += "<krpano>";
+                xml += "<view hlookat=\"0\" vlookat=\"0\" maxpixelzoom=\"1.0\" fovmax=\"150\" limitview=\"auto\" \/>";
+                xml += "	";
+                xml += "";
+                xml += "<preview  id=\"preview\" url=\""+url +"\" \/>";
+                xml += "";
+                xml += "	<image type=\"CYLINDER\" hfov=\"1.00\" vfov=\"0.160408\" voffset=\"0.00\" multires=\"true\" tilesize=\"4000\" progressive=\"true\">";
+                xml += "		<level tiledimagewidth=\"8000\" tiledimageheight=\"1283\">";
+                xml += "		<\/level>";
+                xml += "	<\/image>";
+                xml += "";
+                xml += "<\/krpano>";
+
+
+
+            });
+
+        }
+
+        requestFileSystem(Window.TEMPORARY, file.size, saveFile);
+	}
+}
+    
+document.getElementById('fileinput').addEventListener('change', function(){
+    var file = this.files[0];
+    renderImage(file);
+}, false);
+</script>
